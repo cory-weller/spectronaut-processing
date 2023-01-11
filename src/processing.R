@@ -54,12 +54,10 @@ if (!is.null(opt$pep_input)) {
   pep[,-grep('PG',colnames(pep))] = as.data.frame(apply(pep[,-grep('PG',colnames(pep))],2,as.integer))
 }
 #QC-----------------------------------------------------------------------------
-##mkdir
-if (!dir.exists('QC')){
-  dir.create('QC',recursive = T)
+qc_dir <- paste0(opt$outdir, '/QC/')
+if (!dir.exists(qc_dir)){
+  dir.create(qc_dir, recursive = T)
 }
-out_dir='QC'
-
 ##protein QC
 if (!is.null(opt$pro_input)) {
   ###protein number
@@ -72,9 +70,9 @@ if (!is.null(opt$pro_input)) {
     scale_x_discrete(guide = guide_axis(angle = 90))+ 
     geom_hline(yintercept=floor(mean(df_pro_num$pro.num)/1000)*1000, linetype="dashed", color = "red")
   if (ncol(pro)>50){
-    ggsave(plot = p,filename = paste0(opt$outdir,"/QC/",opt$prefix,"_protein_number.pdf"),width = ncol(pro)/10,height = 6)
+    ggsave(plot = p,filename = paste0(qc_dir,opt$prefix,"_protein_number.pdf"),width = ncol(pro)/10,height = 6)
   }else {
-    ggsave(plot = p,filename = paste0(opt$outdir,"/QC/",opt$prefix,"_protein_number.pdf"))
+    ggsave(plot = p,filename = paste0(qc_dir,opt$prefix,"_protein_number.pdf"))
   } 
 
   ###protein distribution
@@ -88,9 +86,9 @@ if (!is.null(opt$pro_input)) {
     theme(axis.text.x = element_text( angle=90))+ 
     geom_hline(yintercept=round(median(df_pro_dis$value)), linetype="dashed", color = "red")
   if (ncol(pro)>50){
-    ggsave(plot = p,filename = paste0(opt$outdir,"/QC/",opt$prefix,"_log10_protein_intensity.pdf"),width = ncol(pro)/10,height =6)
+    ggsave(plot = p,filename = paste0(qc_dir,opt$prefix,"_log10_protein_intensity.pdf"),width = ncol(pro)/10,height =6)
   }else{
-    ggsave(plot = p,filename = paste0(opt$outdir,"/QC/",opt$prefix,"_log10_protein_intensity.pdf"))
+    ggsave(plot = p,filename = paste0(qc_dir,opt$prefix,"_log10_protein_intensity.pdf"))
   }
   
   ###correlation for pro
@@ -110,7 +108,7 @@ if (!is.null(opt$pro_input)) {
       xlab("") +
       ylab("")+
       labs(fill = "Correlation")
-    ggsave(filename = paste0(opt$outdir,"QC/",opt$prefix,"_correlation.pdf"),
+    ggsave(filename = paste0(qc_dir,opt$prefix,"_correlation.pdf"),
            plot = p,width = 6,height = 6)
   }else 
   {
@@ -123,7 +121,7 @@ if (!is.null(opt$pro_input)) {
       xlab("") +
       ylab("")+
       labs(fill = "Correlation")
-    ggsave(filename = paste0(opt$outdir,"/QC/",opt$prefix,"_correlation.pdf"),plot = p,width = ncol(pro)/4,height = ncol(pro)/4)
+    ggsave(filename = paste0(qc_dir,opt$prefix,"_correlation.pdf"),plot = p,width = ncol(pro)/4,height = ncol(pro)/4)
   }
 }
 
@@ -137,7 +135,7 @@ if (!is.null(opt$pep_input)) {
     theme_classic()+
     labs(fill = "",x="",y='#Peptide Groups')+
     theme(axis.text.x = element_text( angle=90))
-  ggsave(plot = p,filename = paste0(opt$outdir,"/QC/",opt$prefix,"_peptide_number.pdf"))
+  ggsave(plot = p,filename = paste0(qc_dir,opt$prefix,"_peptide_number.pdf"))
   
   ###peptide distribution
   df=melt(pep[,-grep('PG',colnames(pep))])
@@ -148,7 +146,7 @@ if (!is.null(opt$pep_input)) {
     theme_classic()+
     labs(fill = "",x="",y='Log10 Peptide number')+
     theme(axis.text.x = element_text( angle=90))
-  ggsave(plot = p,filename = paste0(opt$outdir,"/QC/",opt$prefix,"_log10_peptide_intensity.pdf"))
+  ggsave(plot = p,filename = paste0(qc_dir,opt$prefix,"_log10_peptide_intensity.pdf"))
 }
 
 #filter sample by the correlation,and protein number----------------------------
@@ -180,11 +178,10 @@ if (!is.null(opt$n)){
 }
 
 #proteomics data cluster--------------------------------------------------------
-##mkdir
-if (!dir.exists('cluster_plot')){
-  dir.create('cluster_plot',recursive = T)
+cluster_dir <- paste0(opt$outdir, '/cluster_plot/')
+if (!dir.exists(cluster_dir)){
+  dir.create(cluster_dir, recursive = T)
 }
-out_dir='cluster_plot'
 
 ##cluster data(na=0)
 cluster_data=pro[,-grep('PG',colnames(pro))]
@@ -212,21 +209,21 @@ p=ggplot(pca_df, aes(x = PC1, y = PC2, color = Condition)) +
   scale_color_manual(values = allcolour)+
   theme_classic()+
   stat_ellipse(level=0.95)
-ggsave(plot = p,filename = paste0(opt$outdir,"/cluster_plot/",opt$prefix,"_PCA_circle.pdf"),height = 7,width = 9)
+ggsave(plot = p,filename = paste0(cluster_dir,opt$prefix,"_PCA_circle.pdf"),height = 7,width = 9)
 p=ggplot(pca_df, aes(x = PC1, y = PC2, color = Condition)) +
   geom_point(size=4)+
   xlab(paste0("PC1","(",percentage[1],"%)")) +
   ylab(paste0("PC2","(",percentage[2],"%)"))+
   scale_color_manual(values = allcolour)+
   theme_classic()
-ggsave(plot = p,filename = paste0(opt$outdir,"/cluster_plot/",opt$prefix,"_PCA.pdf"),height = 7,width = 9)
+ggsave(plot = p,filename = paste0(cluster_dir,opt$prefix,"_PCA.pdf"),height = 7,width = 9)
 
 
 ##hc
 dist_mat <- dist(t(log2_cluster_data)) #
 hc_cluster <- hclust(dist_mat,method = "complete")
 samplesname<- colnames(log2_cluster_data)
-pdf(file =paste0(opt$outdir,"/cluster_plot/",opt$prefix,"_hc_cluster_log2.pdf"))
+pdf(file =paste0(cluster_dir,opt$prefix,"_hc_cluster_log2.pdf"))
 plot(hc_cluster,cex=0.8,col="dark red",labels = samplesname,main="HC Cluster")
 dev.off()
 ##mean to one
@@ -240,7 +237,7 @@ for (i in unique(gsub("_[1-9]*$",'',colnames(log2_cluster_data)))) {
 dist_mat <- dist(t(data_in1)) #
 hc_cluster <- hclust(dist_mat,method = "complete")
 samplesname<- colnames(data_in1)
-pdf(file = paste0(opt$outdir,"/cluster_plot/",opt$prefix,"_hc_cluster_log2_mean.pdf"))
+pdf(file = paste0(cluster_dir,opt$prefix,"_hc_cluster_log2_mean.pdf"))
 plot(hc_cluster,cex=0.8,col="dark red",labels = samplesname,main="HC Cluster")
 dev.off()
 
@@ -257,14 +254,15 @@ if (length(unique(gsub('_[1-9]*$','',colnames(log2_cluster_data)))) > 6) {
     geom_point(aes(x=UMAP1, y=UMAP2, color=Condition),size=4)+
     scale_color_manual(values = allcolour)+
     theme_classic()
-  ggsave(plot = p,filename = paste0(opt$outdir,"/cluster_plot/",opt$prefix,"umap.pdf"),height = 7,width = 9)
+  ggsave(plot = p,filename = paste0(cluster_dir,opt$prefix,"umap.pdf"),height = 7,width = 9)
 }
 
 #DE analysis--------------------------------------------------------------------
-##mkdir
-if (!dir.exists('DE_analysis')){
-  dir.create('DE_analysis',recursive = T)
+DE_dir <- paste0(opt$outdir, '/DE_analysis/')
+if (!dir.exists(DE_dir)){
+  dir.create(DE_dir, recursive = T)
 }
+
 ##read files
 pro=pro[which(rowSums(pro[,-grep('PG',colnames(pro))])>0),]
 design_matrix=read.csv(opt$design_matrix)
@@ -309,7 +307,7 @@ for (i in condition) {
   result_ttest= merge(df,result_ttest,by.x =0,by.y =1,all=F)
   result_ttest =merge(pro[,grep("PG",colnames(pro))],result_ttest,by=1,all=F)
   result_ttest=result_ttest[order(result_ttest$log2FC,decreasing = T),]
-  write.csv(result_ttest,file = paste0('DE_analysis/',i,'_',unique(design_matrix$control[which(design_matrix$condition==i)]),'_ttest.csv'),row.names = F)
+  write.csv(result_ttest,file = paste0(DE_dir,i,'_',unique(design_matrix$control[which(design_matrix$condition==i)]),'_ttest.csv'),row.names = F)
   result_ttest <- na.omit(result_ttest)
   options(ggrepel.max.overlaps=Inf)
   vol_plot=result_ttest
@@ -338,7 +336,7 @@ for (i in condition) {
     geom_vline(xintercept=-lfc_cutoff, linetype="dashed")+
     theme_classic()
   
-  ggsave(file = paste0(opt$outdir,"DE_analysis/",i,"_",opt$control,"_top10_fdr0.05_fc1.5_vocal.pdf"),plot = p,width = 8,height = 8)
+  ggsave(file = paste0(DE_dir,i,"_",opt$control,"_top10_fdr0.05_fc1.5_vocal.pdf"),plot = p,width = 8,height = 8)
   
 }
 
