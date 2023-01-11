@@ -57,11 +57,13 @@ if (!is.null(opt$pep_input)) {
     colnames(pep) <- gsub('.raw.*','',colnames(pep))
     pep[,-grep('PG',colnames(pep))] <- as.data.frame(apply(pep[,-grep('PG',colnames(pep))],2,as.integer))
 }
+
 #QC-----------------------------------------------------------------------------
 qc_dir <- paste0(opt$outdir, '/QC/')
 if (!dir.exists(qc_dir)){
     dir.create(qc_dir, recursive = T)
 }
+
 ##protein QC
 if (!is.null(opt$pro_input)) {
     ###protein number
@@ -222,7 +224,7 @@ p <- ggplot(pca_df, aes(x = PC1, y = PC2, color = Condition)) +
 ggsave(plot = p,filename = paste0(cluster_dir,opt$prefix,"_PCA.pdf"),height = 7,width = 9)
 
 
-##hc
+## hc
 dist_mat <- dist(t(log2_cluster_data)) #
 hc_cluster <- hclust(dist_mat,method = "complete")
 samplesname <- colnames(log2_cluster_data)
@@ -230,7 +232,7 @@ pdf(file=paste0(cluster_dir, opt$prefix,"_hc_cluster_log2.pdf"))
 plot(hc_cluster,cex=0.8,col="dark red",labels = samplesname,main="HC Cluster")
 dev.off()
 
-##mean to one
+## mean to one
 data_in1 <- data.frame(row.names = rownames(log2_cluster_data))
 for (i in unique(gsub("_[1-9]*$",'',colnames(log2_cluster_data)))) {
     tmp <- log2_cluster_data[,grep(i, colnames(log2_cluster_data)),]
@@ -246,7 +248,7 @@ pdf(file = paste0(cluster_dir,opt$prefix,"_hc_cluster_log2_mean.pdf"))
 plot(hc_cluster,cex=0.8,col="dark red",labels = samplesname,main="HC Cluster")
 dev.off()
 
-##umap
+## umap
 if (length(unique(gsub('_[1-9]*$','',colnames(log2_cluster_data)))) > 6) {
     umap_data <- t(log2_cluster_data)
     set.seed(100)
@@ -262,23 +264,23 @@ if (length(unique(gsub('_[1-9]*$','',colnames(log2_cluster_data)))) > 6) {
     ggsave(plot = p,filename = paste0(cluster_dir,opt$prefix,"umap.pdf"),height = 7,width = 9)
 }
 
-#DE analysis--------------------------------------------------------------------
+# DE analysis--------------------------------------------------------------------
 DE_dir <- paste0(opt$outdir, '/DE_analysis/')
 if (!dir.exists(DE_dir)){
     dir.create(DE_dir, recursive = T)
 }
 
-##read files
+## read files
 pro <- pro[which(rowSums(pro[,-grep('PG',colnames(pro))])>0),]
 design_matrix <- read.csv(opt$design_matrix)
 
-##parameters 
+## Differential Expression parameters 
 fdr_cutoff <- 0.05
 lfc_cutoff <- 0.585
 enrich_pvalue <- 0.05
 gsea_fdr_cutoff <- 0.05
 
-##ttest
+## ttest
 condition <- unique(design_matrix$condition)
 for (i in condition) {
     data_i <- pro[,grep(i,colnames(pro))]
@@ -318,22 +320,22 @@ for (i in condition) {
     write.csv(result_ttest,file = paste0(DE_dir,i,'_',unique(design_matrix$control[which(design_matrix$condition==i)]),'_ttest.csv'),row.names = F)
     result_ttest <- na.omit(result_ttest)
     options(ggrepel.max.overlaps=Inf)
-    vol_plot <- result_ttest
-    vol_plot$Group <- "Others"
-    vol_plot$Group[which(vol_plot$log2FC >= lfc_cutoff)] <-"UP"
-    vol_plot$Group[which(vol_plot$log2FC <= -lfc_cutoff)] <-"DOWN"
-    vol_plot$Group[which(vol_plot$adj.Pvalue >= fdr_cutoff)]<- "Others"
+    volcano_plot <- result_ttest
+    volcano_plot$Group <- "Others"
+    volcano_plot$Group[which(volcano_plot$log2FC >= lfc_cutoff)] <-"UP"
+    volcano_plot$Group[which(volcano_plot$log2FC <= -lfc_cutoff)] <-"DOWN"
+    volcano_plot$Group[which(volcano_plot$adj.Pvalue >= fdr_cutoff)]<- "Others"
 
-    up_gene_5 <- vol_plot[which(vol_plot$Group=="UP"),]
+    up_gene_5 <- volcano_plot[which(volcano_plot$Group=="UP"),]
     up_gene_5 <- up_gene_5[order(up_gene_5$log2FC,decreasing = T)[1:5],]
 
-    down_gene_5 <- vol_plot[which(vol_plot$Group=="DOWN"),]
+    down_gene_5 <- volcano_plot[which(volcano_plot$Group=="DOWN"),]
     down_gene_5 <- down_gene_5[order(down_gene_5$log2FC,decreasing = F)[1:5],]
 
     top5_gene <- rbind(up_gene_5,down_gene_5)
     top5_gene <- top5_gene[!duplicated(top5_gene$PG.Genes),]
 
-    p <- ggplot(vol_plot, aes(x = log2FC, y = -log10(adj.Pvalue))) +
+    p <- ggplot(volcano_plot, aes(x = log2FC, y = -log10(adj.Pvalue))) +
         geom_point(aes(color = Group)) +
         scale_color_manual(values = c("blue", "grey","red")) +
         theme_bw(base_size = 12) + theme(legend.position = "bottom") +
