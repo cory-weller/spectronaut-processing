@@ -21,9 +21,9 @@ outdir='./output' #output dir
 design_matrix='input/design_matrix.csv' #csv file of design matrix for comparison
 #normalization='' # 'T' or 'F'
 
-# mkdir -p ${outdir}/{QC,cluster_plot,DE_analysis}
-
 r_script='processing.R'
+
+module load singularity
 
 singularity run -H $PWD:/home src/${img}.sif \
     Rscript src/${r_script} \
