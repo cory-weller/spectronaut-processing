@@ -43,6 +43,8 @@ r_script='processing.R'
 # pep_input='' #the csv file of the peptide intensity from the SN
 # normalization='' # 'T' or 'F'
 
+module load singularity
+
 singularity run -H $PWD:/home src/${img}.sif \
     Rscript src/${r_script} \
     --pro_input ${pro_input} \
