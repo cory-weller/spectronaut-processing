@@ -3,12 +3,19 @@
 #### Retrieve Singularity image if necessary
 
 img='r-4.0'
-id='77DD71E598E5B51B'
-auth='AJdCAAZQQrCo9cc'
 if [ ! -f src/${img}.sif ]; then
-    wget -O src/${img}.sif \
-        "https://onedrive.live.com/download?cid=${id}&resid=${id}%2124983&authkey=${auth}"
+    wget -O src/${img}.sif 'https://onedrive.live.com/download?cid=77DD71E598E5B51B&resid=77DD71E598E5B51B%2124984&authkey=AA-4BJABVFGWZ3s'
 fi
+
+desiredsum='8b025ad2470983afb09969bc8c30571b55d922ced8f11cb785a92a06e898e6bfc89cfb90af9d6120a80a30bfa1b0d30bb7ab26d921977fdcda3ec9e8c8a5ff0d'
+actualsum=$(sha512sum src/${img}.sif | awk '{print $1}')
+
+if [ "${desiredsum}" != "${actualsum}" ]; then
+    echo "src/${img}.sif  checksum failed! removing src/${img}.sif ... try again!"
+    rm src/${img}.sif
+    exit 1
+fi
+
 # building the singularity image was done by executing the command:
 # singularity build --remote src/${img}.sif src/${img}.singularity
 # (after authorizing singularity remote builder)
