@@ -8,7 +8,8 @@ FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:0-${VARIANT}
 # [Optional] Uncomment if you want to install more global node modules
 # RUN su node -c "npm install -g <your-package-list-here>"
 
-RUN sudo apt-get update && sudo apt-get install -y \
+RUN sudo apt-get update && DEBIAN_FRONTEND=noninteractive \
+    apt-get install -y \
     build-essential \
     libssl-dev \
     uuid-dev \
