@@ -22,7 +22,7 @@ RUN apt-get update \
     cryptsetup \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* \
- && RUN export GOVERSION=1.17.3 OS=linux ARCH=amd64   \
+ && export GOVERSION=1.17.3 OS=linux ARCH=amd64   \
  && rm -rf /usr/local/go \
  && wget -O /tmp/go${GOVERSION}.${OS}-${ARCH}.tar.gz https://dl.google.com/go/go${GOVERSION}.${OS}-${ARCH}.tar.gz \
  && tar -C /usr/local -xzf /tmp/go${GOVERSION}.${OS}-${ARCH}.tar.gz \
