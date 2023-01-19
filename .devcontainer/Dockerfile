@@ -27,7 +27,7 @@ RUN apt-get update \
  && wget -O /tmp/go${GOVERSION}.${OS}-${ARCH}.tar.gz https://dl.google.com/go/go${GOVERSION}.${OS}-${ARCH}.tar.gz \
  && tar -C /usr/local -xzf /tmp/go${GOVERSION}.${OS}-${ARCH}.tar.gz \
  && echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc \
- && source ~/.bashrc \
+ && . ~/.bashrc \
  && git clone https://github.com/hpcng/singularity.git \
  && cd singularity \
  && git checkout v3.8.4 \
