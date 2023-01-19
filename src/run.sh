@@ -4,11 +4,12 @@
 
 img='r-4.0'
 if [ ! -f src/${img}.sif ]; then
-    wget -O src/${img}.sif 'https://onedrive.live.com/download?cid=77DD71E598E5B51B&resid=77DD71E598E5B51B%2124984&authkey=AA-4BJABVFGWZ3s'
+    singularity pull src/${img}.sif \
+        library://wellerca/remote-builds/rb-63c96b25db466da3722a5a6c:latest
 fi
 
-desiredsum='8b025ad2470983afb09969bc8c30571b55d922ced8f11cb785a92a06e898e6bfc89cfb90af9d6120a80a30bfa1b0d30bb7ab26d921977fdcda3ec9e8c8a5ff0d'
-actualsum=$(sha512sum src/${img}.sif | awk '{print $1}')
+desiredsum='854e2cbeb45d731d7e89f6226c9a8f97b0658313'
+actualsum=$(shasum src/${img}.sif | awk '{print $1}')
 
 if [ "${desiredsum}" != "${actualsum}" ]; then
     echo "src/${img}.sif  checksum failed! removing src/${img}.sif ... try again!"
