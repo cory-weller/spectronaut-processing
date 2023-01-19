@@ -31,7 +31,11 @@ design_matrix='input/design_matrix.csv' #csv file of design matrix for compariso
 
 r_script='processing.R'
 
-module load singularity
+if ! command -v singularity > /dev/null; then
+    if command -v module > /dev/null; then
+        module load singularity
+    fi
+fi
 
 singularity run -H $PWD:/home src/${img}.sif \
     Rscript src/${r_script} \
