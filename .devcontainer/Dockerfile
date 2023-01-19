@@ -8,9 +8,8 @@ FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:0-${VARIANT}
 # [Optional] Uncomment if you want to install more global node modules
 # RUN su node -c "npm install -g <your-package-list-here>"
 
-RUN sudo apt-get update 
-RUN DEBIAN_FRONTEND=noninteractive
-RUN sudo apt-get install -y \
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     build-essential \
     libssl-dev \
     uuid-dev \
@@ -20,27 +19,21 @@ RUN sudo apt-get install -y \
     wget \
     pkg-config \
     git \
-    cryptsetup
+    cryptsetup \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/* \
+ && RUN export GOVERSION=1.17.3 OS=linux ARCH=amd64   \
+ && rm -rf /usr/local/go \
+ && wget -O /tmp/go${GOVERSION}.${OS}-${ARCH}.tar.gz https://dl.google.com/go/go${GOVERSION}.${OS}-${ARCH}.tar.gz \
+ && tar -C /usr/local -xzf /tmp/go${GOVERSION}.${OS}-${ARCH}.tar.gz \
+ && echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc \
+ && source ~/.bashrc
 
-# install GO
-RUN export GOVERSION=1.17.3 OS=linux ARCH=amd64  # change this as you need
-RUN sudo rm -rf /usr/local/go
-
-RUN wget -O /tmp/go${GOVERSION}.${OS}-${ARCH}.tar.gz \
-  https://dl.google.com/go/go${GOVERSION}.${OS}-${ARCH}.tar.gz
-RUN sudo tar -C /usr/local -xzf /tmp/go${GOVERSION}.${OS}-${ARCH}.tar.gz
-
-RUN echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
-RUN source ~/.bashrc
-
-# download singularity
-RUN git clone https://github.com/hpcng/singularity.git
-RUN cd singularity
-RUN git checkout v3.8.4
-
-
-# compile singularity
-RUN ./mconfig
-RUN cd ./builddir
-RUN make
-RUN sudo make install
+# download and install singularity
+RUN git clone https://github.com/hpcng/singularity.git \
+ && cd singularity \
+ && git checkout v3.8.4 \
+ && ./mconfig \
+ && cd ./builddir \
+ && make \
+ && make install
