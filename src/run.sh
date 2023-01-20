@@ -1,8 +1,23 @@
 #!/usr/bin/env bash
 
+## Load Singularity if neccesary
+if ! type  singularity &> /dev/null; then
+    if type module &> /dev/null; then
+        module load singularity
+    fi
+fi
+
+if ! type singularity &> /dev/null; then
+    echo 'ERROR: singularity cannot be loaded as a module, and/or cannot be found on this system.'
+    exit
+else
+    echo 'Singularity successfully loaded'
+fi
+
 #### Retrieve Singularity image if necessary
 
 img='r-4.0'
+
 if [ ! -f src/${img}.sif ]; then
     singularity pull src/${img}.sif \
         library://wellerca/remote-builds/rb-63c96b25db466da3722a5a6c:latest
@@ -30,12 +45,6 @@ design_matrix='input/design_matrix.csv' #csv file of design matrix for compariso
 #normalization='' # 'T' or 'F'
 
 r_script='processing.R'
-
-if ! command -v singularity > /dev/null; then
-    if command -v module > /dev/null; then
-        module load singularity
-    fi
-fi
 
 singularity run -H $PWD:/home src/${img}.sif \
     Rscript src/${r_script} \
