@@ -47,7 +47,7 @@ design_matrix='input/design_matrix.csv' #csv file of design matrix for compariso
 
 r_script='processing.R'
 
-singularity run -H $PWD:/home src/${img}.sif \
+singularity run -H $PWD:/home ${img} \
     Rscript src/${r_script} \
     --pro_input ${pro_input} \
     -p ${project_name} \
