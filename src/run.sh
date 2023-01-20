@@ -16,19 +16,20 @@ fi
 
 #### Retrieve Singularity image if necessary
 
-img='r-4.0'
+img='src/r-4.0.sif'
+uri='library://wellerca/remote-builds/rb-63c96b25db466da3722a5a6c:latest'
+desiredsum='854e2cbeb45d731d7e89f6226c9a8f97b0658313'
 
-if [ ! -f src/${img}.sif ]; then
-    singularity pull src/${img}.sif \
-        library://wellerca/remote-builds/rb-63c96b25db466da3722a5a6c:latest
+if [ ! -f "${img}" ]; then
+    singularity pull ${img} ${uri}
 fi
 
-desiredsum='854e2cbeb45d731d7e89f6226c9a8f97b0658313'
-actualsum=$(shasum src/${img}.sif | awk '{print $1}')
+actualsum=$(shasum ${img} | awk '{print $1}')
 
 if [ "${desiredsum}" != "${actualsum}" ]; then
-    echo "src/${img}.sif  checksum failed! removing src/${img}.sif ... try again!"
-    rm src/${img}.sif
+    echo "${img} checksum failed! removing ${img}"
+    rm ${img}
+    echo "try again!"
     exit 1
 fi
 
